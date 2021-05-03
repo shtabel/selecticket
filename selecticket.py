@@ -33,18 +33,14 @@ def ticket_create():
         'theme': request.args.get('theme'),
         'email': request.args.get('email')
     }
-    # TODO: make checks easier and more readable
     # validate params
-    check = utils.has_fields(raw_params, ('theme', 'email'))
-    if check:
-        return check
-    check = utils.validate_email(raw_params['email'])
-    if check:
-        return check
-    check = utils.check_uuid(raw_params['id'])
-    if check:
-        return check
-    return ticket.create(raw_params)
+    try:
+        utils.has_fields(raw_params, ('theme', 'email'))
+        utils.validate_email(raw_params['email'])
+        utils.check_uuid(raw_params['id'])
+        return ticket.create(raw_params)
+    except ValueError as exc:
+        return utils.return_text(exc)
 
 
 @app.route("/ticket/_update", methods = ['GET'])
@@ -53,28 +49,27 @@ def ticket_update():
         'id': request.args.get('id'),
         'status': request.args.get('status')
     }
-    # TODO: make checks easier and more readable
-    check = utils.has_fields(raw_params, ('id', 'status'))
-    if check:
-        return check
-    check = utils.check_uuid(raw_params['id'])
-    if check:
-        return check
-    return ticket.status_update(raw_params)
+    try:
+        utils.has_fields(raw_params, ('id', 'status'))
+        utils.check_uuid(raw_params['id'])
+        return ticket.status_update(raw_params)
+    except ValueError as exc:
+        return utils.return_text(exc)
 
 
 @app.route("/ticket/<ticket_id>}", methods = ['GET'])
 def ticket_read(ticket_id):
-    check = utils.check_uuid(ticket_id)
-    if check:
-        return check
-    ticket_dict = ticket.read(ticket_id)
-    body = ''
-    for key, val in ticket_dict.items():
-        body += f'''<p><b>{key}</b>: {val}</p>'''
-    body = f'<div>{body}</div>'
-    html_text = HTML_TEXT.format(body = body)
-    return html_text
+    try:
+        utils.check_uuid(ticket_id)
+        ticket_dict = ticket.read(ticket_id)
+        body = ''
+        for key, val in ticket_dict.items():
+            body += f'''<p><b>{key}</b>: {val}</p>'''
+        body = f'<div>{body}</div>'
+        html_text = HTML_TEXT.format(body = body)
+        return html_text
+    except ValueError as exc:
+        return utils.return_text(exc)
 
 
 # COMMENT LOGIC
@@ -86,11 +81,14 @@ def comment_create():
         'email': request.args.get('email'),
         'text': request.args.get('text')
     }
-    utils.has_fields(raw_params, ('id', 'parent', 'text'))
-    utils.validate_email(raw_params['email'])
-    utils.check_uuid(raw_params['id'])
-    utils.check_uuid(raw_params['parent'])
-    return comment.create(raw_params)
+    try:
+        utils.has_fields(raw_params, ('id', 'parent', 'text'))
+        utils.validate_email(raw_params['email'])
+        utils.check_uuid(raw_params['id'])
+        utils.check_uuid(raw_params['parent'])
+        return comment.create(raw_params)
+    except ValueError as exc:
+        return utils.return_text(exc)
 
 
 if __name__ == "__main__":

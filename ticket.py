@@ -41,7 +41,7 @@ def status_update(params: dict):
         else:
             available = (const.STATUS_NAMES.get(x, 'unknown') for x in const.ALLOWED_TRANSITIONS[ticket.status])
             txt = utils.return_text(f'Available transitions for current status is: {available}')
-        return txt
+        raise ValueError(txt)
     ticket.status = wanted_status
     db.session.commit()
     return utils.return_text('Status updated')

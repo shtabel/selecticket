@@ -2,7 +2,8 @@ import re
 import uuid
 
 def validation_error():
-    return_text("Email is not valid!")
+    raise ValueError(return_text("Email is not valid!"))
+
 
 def validate_email(email: str):
     if not email:
@@ -17,16 +18,17 @@ def validate_email(email: str):
     pattern = re.compile("^[a-zA-Z0-9_]+$]")
     for part in name_part.split('.'):
         if len(part) == 0:
-            return validation_error()
+            raise ValueError(validation_error())
         if not pattern.match(part):
-            return validation_error()
+            raise ValueError(validation_error())
     # TODO: is it enough?
     pattern = re.compile("^[a-zA-Z0-9]+$]")
     for part in domain_part.split('.'):
         if len(part) == 0:
-            return validation_error()
+            raise ValueError(validation_error())
         if not pattern.match(part):
-            return validation_error()
+            raise ValueError(validation_error())
+
 
 def has_fields(params: dict, fields: tuple, error=True):
     params_missing = []
@@ -35,7 +37,7 @@ def has_fields(params: dict, fields: tuple, error=True):
             params_missing.append(name)
     if params_missing and error:
         err_msg = f'Missing parameters: {params_missing}'
-        return_text(err_msg)
+        raise ValueError(return_text(err_msg))
 
 
 def check_uuid(val):
@@ -43,7 +45,7 @@ def check_uuid(val):
         try:
             uuid.UUID(val)
         except:
-            return return_text('Invalid uuid string!')
+            raise ValueError(return_text('Invalid uuid string!'))
 
 
 def return_text(text):
