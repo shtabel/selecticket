@@ -1,16 +1,9 @@
 import uuid
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask import request
-import config
+from app_init import app
 import comment
 import ticket
 import utils
-
-app = Flask(__name__)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = config.Config.get_db_uri()
-db = SQLAlchemy(app)
 
 
 @app.route("/")
