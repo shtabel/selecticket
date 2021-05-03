@@ -5,6 +5,14 @@ import comment
 import ticket
 import utils
 
+HTML_TEXT = '''
+    <html>
+    <head>
+        <title>MadTentacle.com is down. Here is Selectel test task instead</title>
+    </head>
+    <body>{body}</body>
+    </html>
+'''
 
 @app.route("/")
 @app.route("/index")
@@ -12,15 +20,7 @@ def index():
     heading = "<h1>Hell(n)o There!</h1>"
     content = "<div>While setting up environment for an test task for Selectel I've killed my server accidently, so this site is temporary dead (and ssl is dead too, so you can't view it via https).</div>"
     body = f'{heading}{content}'
-    title = 'MadTentacle.com is down. Here is Selectel test task instead'
-    html_text = f'''
-    <html>
-    <head>
-        <title>{title}</title>
-    </head>
-    <body>{body}</body>
-    </html>
-    '''
+    html_text = HTML_TEXT.format(body = body)
     return html_text
 
 
@@ -33,10 +33,17 @@ def ticket_create():
         'theme': request.args.get('theme'),
         'email': request.args.get('email')
     }
+    # TODO: make checks easier and more readable
     # validate params
-    utils.has_fields(raw_params, ('theme', 'email'))
-    utils.validate_email(raw_params['email'])
-    utils.check_uuid(raw_params['id'])
+    check = utils.has_fields(raw_params, ('theme', 'email'))
+    if check:
+        return check
+    check = utils.validate_email(raw_params['email'])
+    if check:
+        return check
+    check = utils.check_uuid(raw_params['id'])
+    if check:
+        return check
     return ticket.create(raw_params)
 
 
@@ -46,15 +53,28 @@ def ticket_update():
         'id': request.args.get('id'),
         'status': request.args.get('status')
     }
-    utils.has_fields(raw_params, ('id', 'status'))
-    utils.check_uuid(raw_params['id'])
+    # TODO: make checks easier and more readable
+    check = utils.has_fields(raw_params, ('id', 'status'))
+    if check:
+        return check
+    check = utils.check_uuid(raw_params['id'])
+    if check:
+        return check
     return ticket.status_update(raw_params)
 
 
 @app.route("/ticket/<ticket_id>}", methods = ['GET'])
 def ticket_read(ticket_id):
-    utils.check_uuid(ticket_id)
-    return ticket.read(ticket_id)
+    check = utils.check_uuid(ticket_id)
+    if check:
+        return check
+    ticket_dict = ticket.read(ticket_id)
+    body = ''
+    for key, val in ticket_dict.items():
+        body += f'''<p><b>{key}</b>: {val}</p>'''
+    body = f'<div>{body}</div>'
+    html_text = HTML_TEXT.format(body = body)
+    return html_text
 
 
 # COMMENT LOGIC

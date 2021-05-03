@@ -1,36 +1,61 @@
-from  datetime import datetime
 import uuid
-from sqlalchemy.dialects.postgresql import UUID
 from app_init import db
-
+from datamodels import Ticket
 import const
-
-class Ticket(db.Model):
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    lastchange = db.Column(db.DateTime)
-    theme = db.Column(db.String(const.THEME_SIZE), nullable=False)
-    text = db.Column(db.String)
-    email = db.Column(db.String(const.EMAIL_SIZE))
-    status = db.Column(db.Integer, nullable=False, default=const.TICKET_STATUS_OPENED)
+import utils
 
 
 def create(params: dict):
     '''
-    params:
-        id: uuid
-        theme: text
-        email: text
+        params:
+            id: uuid
+            theme: text
+            email: text
     '''
-    #TODO: create a logic!
-    pass
+    ticket = Ticket(**params)
+    db.session.add(ticket)
+    db.session.commit()
+    return utils.return_text('Ticket created')
 
 
 def status_update(params: dict):
-    # TODO: create a logic!
-    pass
+    '''
+        params:
+            id: uuid
+            status: int
+    '''
+    ticket = Ticket.query.filter_by(id = params[id])
+
+    wanted_status = params['status']
+    status_ok = False
+    if ticket.status in const.ALLOWED_TRANSITIONS and wanted_status in const.ALLOWED_TRANSITIONS[ticket.status]:
+        status_ok = True
+
+    if not status_ok:
+        if ticket.status == const.TICKET_STATUS_CLOSED:
+            txt = utils.return_text('Ticket is closed!')
+        elif ticket.status not in const.AVAILABLE_STATUSES:
+            txt = utils.return_text('Current status is not available, ticket is closed for changes!')
+        elif ticket.status not in const.ALLOWED_TRANSITIONS:
+            txt = utils.return_text('There is not known transitions for current status!')
+        else:
+            available = (const.STATUS_NAMES.get(x, 'unknown') for x in const.ALLOWED_TRANSITIONS[ticket.status])
+            txt = utils.return_text(f'Available transitions for current status is: {available}')
+        return txt
+    ticket.status = wanted_status
+    db.session.commit()
+    return utils.return_text('Status updated')
 
 
 def read(ticket_id: uuid):
-    # TODO: create a logic!
-    pass
+    ticket = Ticket.query.filter_by(id = ticket_id)
+    result = {
+        'id': ticket.id,
+        'datetime': ticket.datetime,
+        'lastchange': ticket.lastchange,
+        'theme': ticket.theme,
+        'text': ticket.text,
+        'email': ticket.email,
+        'status': const.STATUS_NAMES.get(ticket.status, 'unknown')
+    }
+    return result
