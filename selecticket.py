@@ -8,7 +8,7 @@ import utils
 HTML_TEXT = '''
     <html>
     <head>
-        <title>MadTentacle.com is down. Here is Selectel test task instead</title>
+        <title>Here is Selectel test task instead</title>
         <style>
             table, th, td {{ border: 1px solid #cacaca;}}
             table {{ border-collapse: collapse; }}
