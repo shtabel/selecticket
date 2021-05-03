@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to serve selecticket
+After=network.target
+
+[Service]
+User=your_username
+Group=www-data
+WorkingDirectory=/home/your_username/selecticket
+Environment="PATH=/home/your_username/selecticket/selecticketenv/bin"
+ExecStart=/home/your_username/selecticket/selecticketenv/bin/uwsgi --ini selecticket.ini
+
+[Install]
+WantedBy=multi-user.target
