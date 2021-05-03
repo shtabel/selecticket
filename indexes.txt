@@ -1,0 +1,5 @@
+CREATE INDEX last_tickets ON public.ticket
+USING btree (datetime desc);
+
+CREATE INDEX last_comments ON public.comment
+USING btree (ticket_id, datetime desc);
