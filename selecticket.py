@@ -3,8 +3,9 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask import request
 import config
-import const
-
+import comment
+import ticket
+import utils
 
 app = Flask(__name__)
 
@@ -29,7 +30,9 @@ def index():
     '''
     return html_text
 
-@app.route("/ticket", methods = ['PUT'])
+
+# TICKET LOGIC
+@app.route("/ticket/_create", methods = ['GET'])
 def ticket_create():
     # gather params
     raw_params = {
@@ -38,11 +41,43 @@ def ticket_create():
         'email': request.args.get('email')
     }
     # validate params
-    if not raw_params['theme']:
-        raise ValueError()
+    utils.has_fields(raw_params, ('theme', 'email'))
+    utils.validate_email(raw_params['email'])
+    utils.check_uuid(raw_params['id'])
+    return ticket.create(raw_params)
 
-    #TODO: validate email
 
+@app.route("/ticket/_update", methods = ['GET'])
+def ticket_update():
+    raw_params = {
+        'id': request.args.get('id'),
+        'status': request.args.get('status')
+    }
+    utils.has_fields(raw_params, ('id', 'status'))
+    utils.check_uuid(raw_params['id'])
+    return ticket.status_update(raw_params)
+
+
+@app.route("/ticket/<ticket_id>}", methods = ['GET'])
+def ticket_read(ticket_id):
+    utils.check_uuid(ticket_id)
+    return ticket.read(ticket_id)
+
+
+# COMMENT LOGIC
+@app.route("/comment/_create", methods = ['GET'])
+def comment_create():
+    raw_params = {
+        'id': request.args.get('id'),
+        'parent': request.args.get('parent'),
+        'email': request.args.get('email'),
+        'text': request.args.get('text')
+    }
+    utils.has_fields(raw_params, ('id', 'parent', 'text'))
+    utils.validate_email(raw_params['email'])
+    utils.check_uuid(raw_params['id'])
+    utils.check_uuid(raw_params['parent'])
+    return comment.create(raw_params)
 
 
 if __name__ == "__main__":

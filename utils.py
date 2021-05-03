@@ -1,9 +1,10 @@
 import re
+import uuid
 
 def validation_error():
     raise ValueError("Email is not valid!")
 
-def validate_email(email):
+def validate_email(email: str):
     parts = email.split('@')
     if len(parts) != 2:
         validation_error()
@@ -24,3 +25,21 @@ def validate_email(email):
             validation_error()
         if not pattern.match(part):
             validation_error()
+
+def has_fields(params: dict, fields: tuple, error=True) -> bool:
+    params_missing = []
+    for name in fields:
+        if not params[name]:
+            params_missing.append(name)
+    if params_missing and error:
+        err_msg = f'Missing parameters: {params_missing}'
+        raise ValueError(err_msg)
+    return not params_missing
+
+
+def check_uuid(val):
+    if not isinstance(val, uuid.UUID):
+        try:
+            uuid.UUID(val)
+        except:
+            raise ValueError('Invalid uuid string!')
