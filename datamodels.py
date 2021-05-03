@@ -23,4 +23,4 @@ class Comment(db.Model):
     email = db.Column(db.String(const.EMAIL_SIZE))
     text = db.Column(db.String, nullable=False)
 
-db.create_all()
+#db.create_all()
